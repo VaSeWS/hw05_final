@@ -1,0 +1,17 @@
+{% extends 'about/about_base.html' %}
+{% block title %}О проекте{% endblock %}
+{% block content %}
+{% load user_filters %}
+    <div class="row">
+        <div class="col-8">
+            <div class="container">
+                <p class="p-0 m-0 ms-1" style="color:#262B2B; font-size: 24px">В этом проекте</p>
+                <h1 class="p-0 m-0" style="color:#8E7DBE; font-size: 72px">Django - всему голова.</h1>
+                <p class="text-end mt-3 me-5" style="color:#262B2B; font-size: 20px">
+                    А полный список зависимостей можно посмотреть
+                <a class="text-decoration-none" target="_blank" href="https://github.com/VaSeWS/hw04_tests/blob/master/requirements.txt">тут</a>
+                </p>
+            </div>
+        </div>
+    </div>
+{% endblock %}

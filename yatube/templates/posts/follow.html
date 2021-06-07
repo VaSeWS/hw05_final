@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Твоя лента{% endblock %}
+{% block header %}{% endblock %}
+{% block content %}
+    {% include "posts/menu.html" %}
+        {% for post in page %}
+            {% include 'posts/post_handler.html' %}
+        {% endfor %}
+{% endblock %}
+{% block bottom_main %}
+    {% include 'paginator.html' %}
+{% endblock %}

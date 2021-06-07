@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}Профиль пользователя {{ profile_data.username }}{% endblock %}
+{% block header %}Профиль пользователя {{ profile_data.username }}{% endblock %}
+
+{% block content %}
+<main role="main" class="container">
+    {% for post in page %}
+        {% include 'posts/post_handler.html' %}
+    {% endfor %}
+</main>
+{% endblock %}
+
+{% block right_menu %}
+     <div class="card">
+         <div class="card-body">
+             <div class="h2">
+                 {{ profile_data.get_full_name }}
+             </div>
+             <div class="h3 text-muted">
+                 {{ profile_data.username }}
+             </div>
+         </div>
+         <ul class="list-group list-group-flush">
+             <li class="list-group-item">
+                 <div class="h6 text-muted">
+                     Подписчиков: {{ in_subs }} <br />
+                     Подписан: {{ subbed_to }}
+                 </div>
+             </li>
+             <li class="list-group-item">
+                 <div class="h6 text-muted">
+                     Записей: {{ profile_data.posts.count }}
+                 </div>
+             </li>
+         </ul>
+     </div>
+    <li class="list-group-item">
+    {% if following %}
+        <a
+        class="btn btn-lg btn-light"
+        href="{% url 'posts:profile_unfollow' profile_data.username %}" role="button">
+        Отписаться
+        </a>
+    {% else %}
+        <a
+        class="btn btn-lg btn-primary"
+        href="{% url 'posts:profile_follow' profile_data.username %}" role="button">
+        Подписаться
+        </a>
+    {% endif %}
+    </li>
+{% endblock %}
+
+{% block bottom_main %}
+{% include 'paginator.html' with page=page %}
+{% endblock %}

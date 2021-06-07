@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Пост{% endblock %}
+{% block header %}{% endblock %}
+{% block content %}
+{% include 'posts/post_handler.html' %}
+{% include 'posts/comments.html' %}
+{% endblock %}
+{% block right_menu %}
+<div class="card">
+    <div class="card-body">
+        <div class="h2">
+            {{ user.get_full_name }}
+        </div>
+        <div class="h3 text-muted">
+            {{ user.username }}
+        </div>
+    </div>
+    <ul class="list-group list-group-flush">
+        <li class="list-group-item">
+            <div class="h6 text-muted">
+                Подписчиков: XXX <br />
+                Подписан: XXX
+            </div>
+        </li>
+        <li class="list-group-item">
+            <div class="h6 text-muted">
+                {{ user }}
+            </div>
+        </li>
+    </ul>
+</div>
+{% endblock %}

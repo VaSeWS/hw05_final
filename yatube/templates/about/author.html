@@ -1,0 +1,18 @@
+{% extends 'about/about_base.html' %}
+{% block title %}Об авторе проекта{% endblock %}
+{% block content %}
+{% load user_filters %}
+    <div class="p-5">
+        <h1 style="color: #8E7DBE;">Привет!</h1>
+    </div>
+    <div style="color: #262B2B; height: 60vh;">
+        <img src="" alt="Мое фото">
+        <p class="fs-6">
+            Я живу в Москве, учусь в
+            <span style="color: #8E7DBE;">Московскои Авиационном Институте
+            </span> и
+            <span style="color: #8E7DBE;">Яндекс Практикуме</span>.
+        </p>
+    </div>
+    <div><p class="text-end"><a href="https://github.com/VaSeWS" target="_blank" style="color: #8E7DBE;">GitHub</a></p></div>
+{% endblock %}

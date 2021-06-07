@@ -1,0 +1,22 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>{% block title %}The Last Social Media You'll Ever Need{% endblock %} | Yatube</title>
+    <!-- Загрузка статики -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'bootstrap-5.0.1-dist/css/bootstrap.css' %}">
+    <link rel="stylesheet" href="{% static 'yatube_styles_about/css/yatube_styles_about.css' %}">
+    <script src="{% static 'bootstrap-5.0.1-dist/js/bootstrap.bundle.js' %}"></script>
+</head>
+
+<body>
+    {% include 'about/nav.html' %}
+    <main class="container">
+        {% block content %}
+        {% endblock %}
+    </main>
+</body>
+
+</html>

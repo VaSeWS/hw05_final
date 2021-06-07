@@ -1,0 +1,35 @@
+<div class="navbar navbar-expand-md navbar-dark bd-navbar shadow-sm mb-3 pb-3">
+    <nav class="container">
+        <a class="navbar-brand ms-3" href="/"><span class="logo_red">Ya</span>tube</a>
+        <nav class="flex-shrink-0 dropdown">
+            {% if user.is_authenticated %}
+                <ul class="nav nav-pills">
+                    <li class="nav-item"><a class="nav-link p-2" href="{% url 'posts:new_post' %}">Новая запись</a></li>
+                    <li class="nav-item">
+                        <div class="nav-item dropdown me-3">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="rgba(255, 249, 251, .7)" class="bi bi-person-fill" viewBox="0 0 16 16">
+                                    <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+                                </svg>
+                                {{ user.username }}
+                            </a>
+                            <ul class="dropdown-menu text-small shadow">
+                                <li><a class="dropdown-item" href="{% url 'posts:profile' user.username %}">Профиль</a></li>
+                                <li><a class="dropdown-item" href="{% url 'password_change' %}">Изменить пароль</a></li>
+                                <li><hr class="dropdown-divider m-2"></li>
+                                <li><a class="dropdown-item" href="{% url 'logout' %}">Выйти</a></li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            {% else %}
+                <ul class="nav nav-pills">
+                    <a class="nav-link text-decoration-none p-2" href="{% url 'login' %}">Войти</a>
+                    <a class="nav-link text-decoration-none p-2" href="{% url 'users:signup' %}">Регистрация</a>
+                </ul>
+            {% endif %}
+        </nav>
+    </nav>
+</div>
+
+
