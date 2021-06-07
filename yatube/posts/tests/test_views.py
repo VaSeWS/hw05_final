@@ -1,4 +1,5 @@
 import shutil
+import time
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -272,23 +273,20 @@ class TestPostsViews(TestCase):
             author=self.author,
         )
 
-        response = self.authorized_client.get(reverse("posts:index"))
+        response_1 = self.authorized_client.get(reverse("posts:index"))
+        time.sleep(20)
+        response_2 = self.authorized_client.get(reverse("posts:index"))
 
         self.assertNotContains(
-            response,
+            response_1,
             post.text
         )
-        self.assertTemplateNotUsed(response, "posts/post_handler.html")
-
-        cache.clear()
-
-        response = self.authorized_client.get(reverse("posts:index"))
-
+        self.assertTemplateNotUsed(response_1, "posts/post_handler.html")
         self.assertContains(
-            response,
+            response_2,
             post.text
         )
-        self.assertTemplateUsed(response, "posts/post_handler.html")
+        self.assertTemplateUsed(response_2, "posts/post_handler.html")
 
     def test_posts_exist_on_expected_pages(self):
         """Посты появляются там, где должны."""
@@ -427,6 +425,7 @@ class TestPostsViews(TestCase):
         )
 
     def test_only_authorized_users_can_leave_comments(self):
+        """Только авторизованные пользователи могут оставлять комментарии."""
         page = reverse(
             "posts:add_comment",
             kwargs={
