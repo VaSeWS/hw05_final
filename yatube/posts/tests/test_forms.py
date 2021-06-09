@@ -5,7 +5,7 @@ from http import HTTPStatus
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
 from posts.models import Group, Post
@@ -13,6 +13,7 @@ from posts.models import Group, Post
 User = get_user_model()
 
 
+@override_settings(MEDIA_ROOT=tempfile.mkdtemp(dir=settings.BASE_DIR))
 class TestPostsForms(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -33,8 +34,13 @@ class TestPostsForms(TestCase):
             author=cls.user,
             group=cls.group,
         )
-
-        settings.MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
+        cls.small_gif = (
+            b'\x47\x49\x46\x38\x39\x61\x01\x00'
+            b'\x01\x00\x00\x00\x00\x21\xf9\x04'
+            b'\x01\x0a\x00\x01\x00\x2c\x00\x00'
+            b'\x00\x00\x01\x00\x01\x00\x00\x02'
+            b'\x02\x4c\x01\x00\x3b'
+        )
 
     @classmethod
     def tearDownClass(cls):
@@ -42,33 +48,25 @@ class TestPostsForms(TestCase):
         super().tearDownClass()
 
     def setUp(self):
+        self.uploaded = SimpleUploadedFile(
+            name='small.gif',
+            content=self.small_gif,
+            content_type='image/gif'
+        )
         self.authorised_client = Client()
         self.authorised_client.force_login(self.user)
 
     def test_post_creation(self):
         """Валидная форма создает запись Post."""
-        small_gif = (
-            b'\x47\x49\x46\x38\x39\x61\x02\x00'
-            b'\x01\x00\x80\x00\x00\x00\x00\x00'
-            b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
-            b'\x00\x00\x00\x2C\x00\x00\x00\x00'
-            b'\x02\x00\x01\x00\x00\x02\x02\x0C'
-            b'\x0A\x00\x3B'
-        )
-        uploaded = [SimpleUploadedFile(
-            name=f"small{i}.gif",
-            content=small_gif,
-            content_type="image/gif"
-        ) for i in range(2)]
+
         form_pieces_of_data = (
             {
                 "text": "Этот пост будет создан через форму создания поста",
                 "group": self.group.pk,
-                "image": uploaded[0],
             },
             {
                 "text": "Этот пост будет создан через форму создания поста",
-                "image": uploaded[1],
+                "image": self.uploaded,
             },
         )
 
@@ -86,36 +84,32 @@ class TestPostsForms(TestCase):
                     reverse("posts:index"),
                 )
                 self.assertEqual(Post.objects.count(), posts_count + 1)
-                self.assertTrue(
-                    Post.objects.filter(
-                        text="Этот пост будет создан через форму "
-                             "создания поста",
-                        author=self.user,
-                        group=form_data.get("group"),
-                        image="posts/%s" % form_data["image"].name
-                    ).exists()
-                )
+        self.assertTrue(
+            Post.objects.filter(
+                text="Этот пост будет создан через форму "
+                     "создания поста",
+                author=self.user,
+                group=form_data.get("group"),
+            ).exists()
+        )
+        self.assertTrue(
+            Post.objects.filter(
+                text="Этот пост будет создан через форму "
+                     "создания поста",
+                author=self.user,
+                image__icontains="posts/small"
+            ).exists()
+        )
 
     def test_post_edit(self):
         """Валидная форма изменяет пост."""
-        small_gif = (
-            b'\x47\x49\x46\x38\x39\x61\x01\x00'
-            b'\x01\x00\x00\x00\x00\x21\xf9\x04'
-            b'\x01\x0a\x00\x01\x00\x2c\x00\x00'
-            b'\x00\x00\x01\x00\x01\x00\x00\x02'
-            b'\x02\x4c\x01\x00\x3b'
-        )
-        uploaded = SimpleUploadedFile(
-            name='small.gif',
-            content=small_gif,
-            content_type='image/gif'
-        )
+
         posts_count = Post.objects.count()
         form_data = {
             "text": "Этот пост был использован для проверки работы "
             "страницы редактирования поста с группой",
             "group": self.another_group.pk,
-            "image": uploaded
+            "image": self.uploaded
         }
 
         response = self.authorised_client.post(
@@ -146,7 +140,7 @@ class TestPostsForms(TestCase):
                 text=form_data["text"],
                 author=self.user,
                 group=form_data.get("group"),
-                image="posts/small.gif"
+                image__icontains="posts/small"
             ).exists()
         )
 

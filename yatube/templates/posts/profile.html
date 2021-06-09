@@ -36,17 +36,27 @@
      </div>
     <li class="list-group-item">
     {% if following %}
-        <a
-        class="btn btn-lg btn-light"
-        href="{% url 'posts:profile_unfollow' profile_data.username %}" role="button">
-        Отписаться
+        <a class="btn btn-lg btn-light" type="submit" role="button"
+           onclick="event.preventDefault();
+           document.getElementById('unsubscription_form').submit();">
+            Отписаться
         </a>
+        <form id="unsubscription_form" action="{% url 'posts:profile_unfollow' profile_data.username %}" method="post" style="display: none;">
+        {% csrf_token %}
+            <input type="hidden" name="user" value={{ user.username }} />
+            <input type="hidden" name="author" value={{ profile_data.username }} />
+        </form>
     {% else %}
-        <a
-        class="btn btn-lg btn-primary"
-        href="{% url 'posts:profile_follow' profile_data.username %}" role="button">
-        Подписаться
+        <a class="btn btn-lg btn-primary" type="submit" role="button"
+           onclick="event.preventDefault();
+           document.getElementById('subscription_form').submit();">
+            Подписаться
         </a>
+        <form id="subscription_form" action="{% url 'posts:profile_follow' profile_data.username %}" method="post" style="display: none;">
+        {% csrf_token %}
+            <input type="hidden" name="user" value={{ user.username }} />
+            <input type="hidden" name="author" value={{ profile_data.username }} />
+        </form>
     {% endif %}
     </li>
 {% endblock %}

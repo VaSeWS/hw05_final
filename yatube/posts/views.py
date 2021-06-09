@@ -1,13 +1,13 @@
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.decorators.http import require_GET
+import django.views.decorators.http as http_dec
 
 from .forms import CommentForm, PostForm
 from .models import Comment, Follow, Group, Post, User
 
 
-@require_GET
+@http_dec.require_GET
 def index(request):
     posts = Post.objects.select_related("author")
     paginator = Paginator(posts, 10)
@@ -20,7 +20,7 @@ def index(request):
     return render(request, "posts/index.html", context)
 
 
-@require_GET
+@http_dec.require_GET
 @login_required
 def follow_index(request):
     user = request.user
@@ -36,7 +36,7 @@ def follow_index(request):
     return render(request, "posts/follow.html", context)
 
 
-@require_GET
+@http_dec.require_GET
 def group_posts(request, slug):
     group = get_object_or_404(Group, slug=slug)
     posts = group.posts.select_related("author")
@@ -51,6 +51,7 @@ def group_posts(request, slug):
     return render(request, "posts/group.html", context)
 
 
+@http_dec.require_http_methods(["GET", "POST"])
 @login_required
 def new_post(request):
     form = PostForm(
@@ -70,6 +71,7 @@ def new_post(request):
     return render(request, "posts/new_post.html", context)
 
 
+@http_dec.require_http_methods(["GET", "POST"])
 @login_required
 def edit_post(request, username, post_id):
     post = get_object_or_404(Post, pk=post_id)
@@ -95,13 +97,13 @@ def edit_post(request, username, post_id):
     return render(request, "posts/new_post.html", context)
 
 
-@require_GET
+@http_dec.require_GET
 def profile(request, username):
     profile_data = get_object_or_404(User, username=username)
     following = Follow.objects.filter(
         user=request.user,
         author=profile_data
-    ).exists() if isinstance(request.user, User) else False
+    ).exists() if request.user.is_authenticated else False
 
     subbed_to = Follow.objects.filter(user=profile_data).count()
     in_subs = Follow.objects.filter(author=profile_data).count()
@@ -121,7 +123,7 @@ def profile(request, username):
     return render(request, "posts/profile.html", context)
 
 
-@require_GET
+@http_dec.require_GET
 def post_view(request, username, post_id):
     post = get_object_or_404(Post, pk=post_id)
     author_data = get_object_or_404(User, username=username)
@@ -137,6 +139,7 @@ def post_view(request, username, post_id):
     return render(request, "posts/post.html", context)
 
 
+@http_dec.require_POST
 @login_required
 def add_comment(request, post_id, username):
     post = get_object_or_404(Post, pk=post_id)
@@ -162,6 +165,8 @@ def add_comment(request, post_id, username):
     )
 
 
+@http_dec.require_http_methods(["GET", "POST"])  # Pytest tests use GET
+# instead of POST, so GET is required here
 @login_required
 def profile_follow(request, username):
     author = get_object_or_404(User, username=username)
@@ -174,6 +179,7 @@ def profile_follow(request, username):
     return redirect("posts:profile", username)
 
 
+@http_dec.require_http_methods(["GET", "POST"])  # Same as def profile_follow
 @login_required
 def profile_unfollow(request, username):
     author = get_object_or_404(User, username=username)
@@ -183,16 +189,3 @@ def profile_unfollow(request, username):
         author=author
     ).delete()
     return redirect("posts:profile", username)
-
-
-def page_not_found(request, exception):
-    return render(
-        request,
-        "misc/404.html",
-        {"path": request.path},
-        status=404
-    )
-
-
-def server_error(request):
-    return render(request, "misc/500.html", status=500)

@@ -1,10 +1,12 @@
 import shutil
+import tempfile
 import time
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
 from posts.forms import PostForm
@@ -13,6 +15,7 @@ from posts.models import Comment, Follow, Group, Post
 User = get_user_model()
 
 
+@override_settings(MEDIA_ROOT=tempfile.mkdtemp(dir=settings.BASE_DIR))
 class TestPostsViews(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -57,6 +60,7 @@ class TestPostsViews(TestCase):
         super().tearDownClass()
 
     def setUp(self):
+        cache.clear()
         self.authorized_client = Client()
         self.authorized_client.force_login(self.author)
 
@@ -273,7 +277,7 @@ class TestPostsViews(TestCase):
         )
 
         response_1 = self.authorized_client.get(reverse("posts:index"))
-        time.sleep(20)
+        cache.clear()
         response_2 = self.authorized_client.get(reverse("posts:index"))
 
         self.assertNotContains(
@@ -379,12 +383,12 @@ class TestPostsViews(TestCase):
             kwargs={"username": self.author}
         )
 
-        follower_client.get(page_follow)
+        follower_client.post(page_follow)
         follow_response = Follow.objects.filter(
             user=follower,
             author=self.author
         ).exists()
-        follower_client.get(page_unfollow)
+        follower_client.post(page_unfollow)
         unfollow_response = Follow.objects.filter(
             user=follower,
             author=self.author
