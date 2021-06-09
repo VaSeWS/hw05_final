@@ -1,7 +1,7 @@
+import django.views.decorators.http as http_dec
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
-import django.views.decorators.http as http_dec
 
 from .forms import CommentForm, PostForm
 from .models import Comment, Follow, Group, Post, User
